@@ -1,0 +1,122 @@
+
+@startuml
+title Diagram Kelas - Sistem Persetujuan Kredit
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam defaultFontName Arial
+
+class CreditApprovalApp {
+  +main(args : String[]) : void
+}
+
+class CreditApprovalGUI {
+  -model : ID3
+  -csvPath : String
+  -inputFields : Map<String, JComboBox<String>>
+  -predictionLabel : JLabel
+  -statusLabel : JLabel
+  -pathArea : JTextArea
+  -decisionTree : JTree
+  -analysisArea : JTextArea
+
+  +CreditApprovalGUI(model : ID3, csvPath : String)
+  -buildUI() : void
+  -createHeader() : JPanel
+  -createInputPanel() : JPanel
+  -createResultPanel() : JPanel
+  -predict() : void
+  -buildPredictionPath(input, prediction) : String
+  -refreshDecisionTree(input) : void
+  -refreshAnalysis() : void
+  +main(args : String[]) : void
+}
+
+class ID3 {
+  -TARGET : String
+  -POSITIVE : String
+  -NEGATIVE : String
+  -attributes : List<String>
+  -trainingData : List<Map<String,String>>
+  -fallbackClasses : Map<Node,String>
+  -tree : Tree
+  -majorityClass : String
+
+  +loadCsv(filePath : String) : void
+  +train() : void
+  -buildTree(rows, remainingAttributes, isRoot) : Node
+  -chooseBestAttribute(rows, candidateAttributes) : String
+  +entropy(rows) : double
+  +informationGain(rows, attribute) : double
+  +predict(input) : String
+  +getDecisionPath(input) : List<String>
+  +getTree() : Tree
+  +getAttributes() : List<String>
+  +getTrainingData() : List<Map<String,String>>
+  +getMajorityClass() : String
+  +getTrainingSize() : int
+}
+
+class Tree {
+  -root : Node
+  +getRoot() : Node
+  +setRoot(root : Node) : void
+  +isEmpty() : boolean
+  +print() : void
+  -printNode(node, indent) : void
+}
+
+class Node {
+  -data : String
+  -type : NodeType
+  -parent : Node
+  -children : List<Node>
+
+  +Node(data : String, type : NodeType)
+  +getData() : String
+  +setData(data : String) : void
+  +getType() : NodeType
+  +setType(type : NodeType) : void
+  +getParent() : Node
+  +getChildren() : List<Node>
+  +addChild(child : Node) : void
+  +removeChildren() : void
+  +isLeaf() : boolean
+}
+
+enum NodeType {
+  ROOTNODE
+  BRANCH
+  LEAFNODE
+}
+
+CreditApprovalApp ..> ID3 : menggunakan model
+CreditApprovalGUI ..> ID3 : meminta prediksi
+ID3 *-- Tree : membentuk pohon
+Tree *-- Node : menyimpan akar
+Node "1" *-- "0..*" Node : memiliki cabang
+Node --> NodeType : menentukan jenis simpul
+
+note bottom of CreditApprovalGUI
+  Menyediakan antarmuka pengguna
+  untuk input pemohon dan hasil prediksi.
+end note
+
+note bottom of CreditApprovalApp
+  Titik masuk alternatif untuk
+  menjalankan aplikasi melalui console.
+end note
+
+note right of ID3
+  Melatih model menggunakan algoritma ID3,
+  menghitung entropy dan information gain,
+  serta menentukan hasil klasifikasi.
+end note
+
+note bottom of Node
+  Simpul dapat berupa akar,
+  cabang, atau daun keputusan.
+end note
+
+@enduml

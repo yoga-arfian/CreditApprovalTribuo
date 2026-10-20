@@ -1,0 +1,55 @@
+
+@startuml
+title Diagram Urutan - Prediksi Persetujuan Kredit
+
+autonumber
+actor "Pengguna" as User
+participant "CreditApprovalGUI" as GUI
+participant "ID3" as Model
+participant "Tree" as Pohon
+participant "Node" as Simpul
+
+User -> GUI : Mengisi profil pemohon
+User -> GUI : Menekan tombol Prediksi
+
+activate GUI
+GUI -> GUI : predict()
+GUI -> GUI : Mengambil nilai input pemohon
+
+GUI -> Model : predict(input)
+activate Model
+
+Model -> Pohon : getRoot()
+Pohon --> Model : Mengembalikan simpul akar
+
+loop Menelusuri pohon keputusan
+    Model -> Simpul : isLeaf()
+    Simpul --> Model : Status simpul
+
+    alt Simpul bukan daun
+        Model -> Simpul : getData()
+        Simpul --> Model : Nama atribut
+        Model -> Simpul : getChildren()
+        Simpul --> Model : Daftar cabang
+        Model -> Model : Mencocokkan nilai input
+    else Simpul merupakan daun
+        Model -> Simpul : getData()
+        Simpul --> Model : Hasil klasifikasi
+    end
+end
+
+Model --> GUI : Hasil prediksi
+deactivate Model
+
+GUI -> GUI : Memperbarui label hasil
+GUI -> Model : getDecisionPath(input)
+Model --> GUI : Daftar langkah keputusan
+
+GUI -> GUI : Menyusun jalur keputusan
+GUI -> GUI : Memperbarui visualisasi pohon
+GUI -> GUI : Memperbarui status prediksi
+
+GUI --> User : Menampilkan hasil dan jalur keputusan
+deactivate GUI
+
+@enduml
